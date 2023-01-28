@@ -18,6 +18,8 @@ Authors
 -------
 
 - Bradley S. Meyer <mbradle@g.clemson.edu>
+- Mengke Li <mengkel@g.clemson.edu>
+
 
 Contribute
 ----------

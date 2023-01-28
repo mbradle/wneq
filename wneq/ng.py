@@ -5,7 +5,6 @@ import wnnet.nuc as wn
 import numpy as np
 from scipy import optimize
 
-
 class Ng:
     """A class for handling (n,g)-(g,n) equilibria.
 
@@ -92,6 +91,21 @@ class Ng:
         return f
 
     def compute(self, t9, rho, munp, yz):
+        """Method to compute an (n,g)-(g,n) equilibrium.
+
+        Args:
+            ``t9`` (:obj:`float`): The temperature (in 10 :sup:`9` Kelvin) at which to compute the equilibrium.
+
+            ``rho`` (:obj:`float`): The mass density in grams per cc  at which to compute the equilibrium.
+
+            ``munp`` (:obj:`float`): The neutron chemical potential (in MeV) at which to compute the equilibrium..
+
+            ``yz`` (:obj:`dict`): A dictionary with the elemental abundances for the calculation.  The keys of the dictionary are :obj:`int` giving the atomic numbr while the value is the abundance per nucleon for that atomic number.  On successful return, the equilibrium abundances will have the save elemental abundances as those given in *yz*.
+
+        Returns:
+            A `wnutils <https://wnutils.readthedocs.io>`_ zone object with the results of the calculation.
+
+        """
 
         f = self._compute_f(t9, rho)
 
@@ -113,6 +127,19 @@ class Ng:
         return [result]
 
     def compute_with_root(self, t9, rho, yz):
+        """Method to compute an (n,g)-(g,n) equilibrium.  The resulting equilibrium is that the system would relax to in the absence of charge-changing reactions and sufficient time.  The return result contains the neutron abundance and chemical potential for the appropriate equilibrium.
+
+        Args:
+            ``t9`` (:obj:`float`): The temperature (in 10 :sup:`9` Kelvin) at which to compute the equilibrium.
+
+            ``rho`` (:obj:`float`): The mass density in grams per cc  at which to compute the equilibrium.
+
+            ``yz`` (:obj:`dict`): A dictionary with the elemental abundances for the calculation.  The keys of the dictionary are :obj:`int` giving the atomic numbr while the value is the abundance per nucleon for that atomic number.  On successful return, the equilibrium abundances will have the save elemental abundances as those given in *yz*.
+
+        Returns:
+            A `wnutils <https://wnutils.readthedocs.io>`_ zone object with the results of the calculation.
+
+        """
 
         f = self._compute_f(t9, rho)
 
@@ -123,6 +150,16 @@ class Ng:
         return result
 
     def compute_with_root_from_zone(self, zone):
+        """Method to compute an (n,g)-(g,n) equilibrium.  The resulting equilibrium is that the system would relax to in the absence of charge-changing reactions and sufficient time.  The return result contains the neutron abundance and chemical potential for the appropriate equilibrium.
+
+        Args:
+            ``zone``: A `wnutils <https://wnutils.readthedocs.io>`_ zone object with the physical conditions and abundances from which to compute the equilibrium.
+
+        Returns:
+            A `wnutils <https://wnutils.readthedocs.io>`_ zone object with the results of the calculation.
+
+        """
+
 
         t9 = float(zone["properties"]["t9"])
         rho = float(zone["properties"]["rho"])
