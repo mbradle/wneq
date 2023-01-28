@@ -40,4 +40,3 @@ Usage
 
 The best way to get started using wneq is to follow the
 `tutorials <http://wneq.readthedocs.io/en/latest/tutorials.html>`_.
-You may also want to visit our `galleries <https://github.com/mbradle/wneq/wiki/Galleries>`_ or check out our `Jupyter Notebooks <https://github.com/mbradle/wneq_tutorials/>`_ or our `Code Samples <https://github.com/mbradle/wneq/wiki/Code-Samples>`_.
