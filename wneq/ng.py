@@ -13,7 +13,6 @@ class Ng:
 
         ``nuc_xpath`` (:obj:`str`, optional): An XPath expression to select nuclides.  Default is all nuclides.
 
-        ``zone_xpath`` (:obj:`str`, optional): An XPath expression to select zones.  Default is all zones.
     """
 
     def __init__(self, file, nuc_xpath=""):
@@ -117,7 +116,7 @@ class Ng:
 
             ``munp`` (:obj:`float`): The neutron chemical potential (in MeV) at which to compute the equilibrium..
 
-            ``yz`` (:obj:`dict`): A dictionary with the elemental abundances for the calculation.  The keys of the dictionary are :obj:`int` giving the atomic numbr while the value is the abundance per nucleon for that atomic number.  On successful return, the equilibrium abundances will have the same elemental abundances as those given in *yz*.
+            ``yz`` (:obj:`dict`): A dictionary with the elemental abundances for the calculation.  The keys of the dictionary are :obj:`int` giving the atomic number while the value is the abundance per nucleon for that atomic number.  On successful return, the equilibrium abundances will have the same elemental abundances as those given in *yz*.
 
         Returns:
             A `wnutils <https://wnutils.readthedocs.io>`_ zone object with the results of the calculation.
@@ -151,7 +150,7 @@ class Ng:
 
             ``rho`` (:obj:`float`): The mass density in grams per cc  at which to compute the equilibrium.
 
-            ``yz`` (:obj:`dict`): A dictionary with the elemental abundances for the calculation.  The keys of the dictionary are :obj:`int` giving the atomic numbr while the value is the abundance per nucleon for that atomic number.  On successful return, the equilibrium abundances will have the save elemental abundances as those given in *yz*.
+            ``yz`` (:obj:`dict`): A dictionary with the elemental abundances for the calculation.  The keys of the dictionary are :obj:`int` giving the atomic number while the value is the abundance per nucleon for that atomic number.  On successful return, the equilibrium abundances will have the save elemental abundances as those given in *yz*.
 
         Returns:
             A `wnutils <https://wnutils.readthedocs.io>`_ zone object with the results of the calculation.
