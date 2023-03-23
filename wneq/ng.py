@@ -2,8 +2,10 @@
 
 import wnnet.consts as wc
 import wnnet.nuc as wn
+import wnnet.zones as wz
 import numpy as np
 from scipy import optimize
+
 
 class Ng:
     """A class for handling (n,g)-(g,n) equilibria.
@@ -13,10 +15,12 @@ class Ng:
 
         ``nuc_xpath`` (:obj:`str`, optional): An XPath expression to select nuclides.  Default is all nuclides.
 
+        ``zone_xpath`` (:obj:`str`, optional): An XPath expression to select zones.  Default is all zones.
     """
 
     def __init__(self, file, nuc_xpath=""):
         self.nuc = wn.Nuc(file, nuc_xpath)
+        self.zones_xml = wz.Zones_Xml(file)
 
     def get_nuclides(self, nuc_xpath=""):
         """Method to return a collection of nuclides.
@@ -31,6 +35,19 @@ class Ng:
 
         return self.nuc.get_nuclides(nuc_xpath=nuc_xpath)
 
+    def get_zones(self, zone_xpath=""):
+        """Method to return a collection of zones.
+
+        Args:
+            ``zone_xpath`` (:obj:`str`, optional): An XPath expression to select the zones.  Default is all zones
+
+        Returns:
+            A :obj:`dict` containing `wnutils <https://wnutils.readthedocs.io>`_ zones.
+
+        """
+
+        return self.zones_xml.get_zones(zone_xpath=zone_xpath)
+
     def _compute_ng(self, f, t9, rho, munpkT, yz):
         yzt = {}
         yl = {}
@@ -39,7 +56,7 @@ class Ng:
         props = {}
 
         for z in yz:
-            ylm[z] = float('-inf')
+            ylm[z] = float("-inf")
             yzt[z] = 0
 
         nuclides = self.nuc.get_nuclides()
@@ -100,7 +117,7 @@ class Ng:
 
             ``munp`` (:obj:`float`): The neutron chemical potential (in MeV) at which to compute the equilibrium..
 
-            ``yz`` (:obj:`dict`): A dictionary with the elemental abundances for the calculation.  The keys of the dictionary are :obj:`int` giving the atomic numbr while the value is the abundance per nucleon for that atomic number.  On successful return, the equilibrium abundances will have the save elemental abundances as those given in *yz*.
+            ``yz`` (:obj:`dict`): A dictionary with the elemental abundances for the calculation.  The keys of the dictionary are :obj:`int` giving the atomic numbr while the value is the abundance per nucleon for that atomic number.  On successful return, the equilibrium abundances will have the same elemental abundances as those given in *yz*.
 
         Returns:
             A `wnutils <https://wnutils.readthedocs.io>`_ zone object with the results of the calculation.
@@ -159,7 +176,6 @@ class Ng:
             A `wnutils <https://wnutils.readthedocs.io>`_ zone object with the results of the calculation.
 
         """
-
 
         t9 = float(zone["properties"]["t9"])
         rho = float(zone["properties"]["rho"])
