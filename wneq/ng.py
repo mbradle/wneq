@@ -1,9 +1,7 @@
 """This module computes (n,g)-(g,n) equilibrium from `webnucleo <https://webnucleo.readthedocs.io>`_ files."""
 
-import wnnet.consts as wc
-import wnnet.nuc as wn
-import wnnet.zones as wz
 import numpy as np
+import wnnet as wn
 from scipy import optimize
 
 
@@ -19,8 +17,8 @@ class Ng:
     """
 
     def __init__(self, file, nuc_xpath=""):
-        self.nuc = wn.Nuc(file, nuc_xpath)
-        self.zones_xml = wz.Zones_Xml(file)
+        self.nuc = wn.nuc.Nuc(file, nuc_xpath)
+        self.zones_xml = wn.zones.Zones_Xml(file)
 
     def get_nuclides(self, nuc_xpath=""):
         """Method to return a collection of nuclides.
@@ -89,7 +87,9 @@ class Ng:
 
         props["munpkT"] = str(munpkT)
 
-        props["munp"] = str(wc.ergs_to_MeV * (munpkT * (wc.k_B * t9 * 1.0e9)))
+        props["munp"] = str(
+            wn.consts.ergs_to_MeV * (munpkT * (wn.consts.k_B * t9 * 1.0e9))
+        )
 
         return {"properties": props, "mass fractions": mass_frac}
 
@@ -103,7 +103,7 @@ class Ng:
         for nuc in nuclides:
             f[nuc] = np.log(self.nuc.compute_quantum_abundance(nuc, t9, rho)) + (
                 nuclides[nuc]["a"] * delta_n - nuclides[nuc]["mass excess"]
-            ) * wc.MeV_to_ergs / (wc.k_B * t9 * 1.0e9)
+            ) * wn.consts.MeV_to_ergs / (wn.consts.k_B * t9 * 1.0e9)
 
         return f
 
@@ -126,7 +126,7 @@ class Ng:
 
         f = self._compute_f(t9, rho)
 
-        munpkT = munp * wc.MeV_to_ergs / (wc.k_B * t9 * 1.0e9)
+        munpkT = munp * wn.consts.MeV_to_ergs / (wn.consts.k_B * t9 * 1.0e9)
 
         return self._compute_ng(f, t9, rho, munpkT, yz)
 
