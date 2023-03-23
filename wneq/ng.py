@@ -39,7 +39,7 @@ class Ng:
         props = {}
 
         for z in yz:
-            ylm[z] = 0
+            ylm[z] = float('-inf')
             yzt[z] = 0
 
         nuclides = self.nuc.get_nuclides()
