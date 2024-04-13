@@ -1,4 +1,4 @@
-rm -f source/wnnet.*.rst
+rm -f source/wneq.*.rst
 mkdir -p source/_static source/_templates
-sphinx-apidoc -M -f -n -o source ../wnnet
+sphinx-apidoc -M -f -n -o source ../wneq
 make html
