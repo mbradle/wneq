@@ -1,3 +1,6 @@
+"""
+A package of python routines to handle webnucleo equilibria.
+"""
 __all__ = [
     "__title__",
     "__summary__",
