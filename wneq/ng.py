@@ -20,7 +20,6 @@ class Ng:
 
     def __init__(self, file, nuc_xpath=""):
         self.nuc = wn.nuc.Nuc(file, nuc_xpath)
-        self.zones_xml = wn.zones.Zones_Xml(file)
 
     def get_nuclides(self, nuc_xpath=""):
         """Method to return a collection of nuclides.
@@ -35,21 +34,6 @@ class Ng:
         """
 
         return self.nuc.get_nuclides(nuc_xpath=nuc_xpath)
-
-    def get_zones(self, zone_xpath=""):
-        """Method to return a collection of zones.
-
-        Args:
-            ``zone_xpath`` (:obj:`str`, optional): An XPath expression
-            to select the zones.  Default is all zones
-
-        Returns:
-            A :obj:`dict` containing
-            `wnutils <https://wnutils.readthedocs.io>`_ zones.
-
-        """
-
-        return self.zones_xml.get_zones(zone_xpath=zone_xpath)
 
     def _compute_ng(self, fac, t_9, mun_kt, y_z):
         y_zt = {}
