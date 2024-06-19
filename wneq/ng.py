@@ -10,16 +10,15 @@ class Ng:
     """A class for handling (n,g)-(g,n) equilibria.
 
     Args:
-        ``file`` (:obj:`str`): A string giving the XML file name with the
-        nuclide data.
+        ``net``: A wnnet \
+        `network <https://wnnet.readthedocs.io/en/latest/wnnet.html#wnnet.net.Net>`_\
+        object.
 
-        ``nuc_xpath`` (:obj:`str`, optional): An XPath expression to select
-        nuclides.  Default is all nuclides.
 
     """
 
-    def __init__(self, file, nuc_xpath=""):
-        self.nuc = wn.nuc.Nuc(file, nuc_xpath)
+    def __init__(self, net):
+        self.net = net
 
     def get_nuclides(self, nuc_xpath=""):
         """Method to return a collection of nuclides.
@@ -33,7 +32,7 @@ class Ng:
 
         """
 
-        return self.nuc.get_nuclides(nuc_xpath=nuc_xpath)
+        return self.net.get_nuclides(nuc_xpath=nuc_xpath)
 
     def _compute_ng(self, fac, t_9, mun_kt, y_z):
         y_zt = {}
@@ -46,7 +45,7 @@ class Ng:
             ylm[key] = float("-inf")
             y_zt[key] = 0
 
-        for key, value in self.nuc.get_nuclides().items():
+        for key, value in self.net.get_nuclides().items():
             if value["z"] in y_z:
                 y_t = fac[key] + value["a"] * mun_kt
                 if y_t > ylm[value["z"]]:
@@ -83,7 +82,7 @@ class Ng:
     def _compute_fac(self, t_9, rho):
         fac = {}
 
-        nuclides = self.nuc.get_nuclides()
+        nuclides = self.net.get_nuclides()
 
         delta_n = nuclides["n"]["mass excess"]
 
