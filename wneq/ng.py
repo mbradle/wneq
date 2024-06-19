@@ -88,7 +88,7 @@ class Ng:
 
         for nuc in nuclides:
             fac[nuc] = np.log(
-                self.nuc.compute_quantum_abundance(nuc, t_9, rho)
+                self.net.compute_quantum_abundance(nuc, t_9, rho)
             ) + (
                 nuclides[nuc]["a"] * delta_n - nuclides[nuc]["mass excess"]
             ) * wn.consts.MeV_to_ergs / (
