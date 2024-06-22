@@ -1,12 +1,15 @@
 import requests, io
+import wnnet.nuc as wn
 import wneq as wq
 import numpy as np
 
 
 def test_wneq():
-    ng = wq.Ng(
+    nuc = wn.Nuc(
         io.BytesIO(requests.get("https://osf.io/kyhbs/download").content)
     )
+
+    ng = wq.Ng(nuc)
 
     t9 = 1.0
     rho = 1.0e5
@@ -19,9 +22,11 @@ def test_wneq():
 
 
 def test_zone():
-    ng = wq.Ng(
+    nuc = wn.Nuc(
         io.BytesIO(requests.get("https://osf.io/kyhbs/download").content)
     )
+
+    ng = wq.Ng(nuc)
 
     properties = {}
     properties["t9"] = 2

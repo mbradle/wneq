@@ -3,8 +3,7 @@ Under development
 Overview
 ========
 
-wneq is a python package for computing nuclear equilibria from
-`webnucleo <http://webnucleo.org/>`_ files.
+wneq is a python package for computing nuclear equilibria.
 
 Installation
 ------------
@@ -36,9 +35,3 @@ Documentation
 -------------
 
 The project documentation is available at `<https://wneq.readthedocs.io>`_.
-
-Usage
------
-
-The best way to get started using wneq is to follow the
-`tutorials <http://wneq.readthedocs.io/en/latest/tutorials.html>`_.

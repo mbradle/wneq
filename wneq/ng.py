@@ -10,15 +10,15 @@ class Ng:
     """A class for handling (n,g)-(g,n) equilibria.
 
     Args:
-        ``net``: A wnnet \
-        `network <https://wnnet.readthedocs.io/en/latest/wnnet.html#wnnet.net.Net>`_\
+        ``nuc``: A wnnet \
+        `nuclear data <https://wnnet.readthedocs.io/en/latest/wnnet.html#module-wnnet.nuc>`_\
         object.
 
 
     """
 
-    def __init__(self, net):
-        self.net = net
+    def __init__(self, nuc):
+        self.nuc = nuc
 
     def get_nuclides(self, nuc_xpath=""):
         """Method to return a collection of nuclides.
@@ -32,7 +32,7 @@ class Ng:
 
         """
 
-        return self.net.get_nuclides(nuc_xpath=nuc_xpath)
+        return self.nuc.get_nuclides(nuc_xpath=nuc_xpath)
 
     def _compute_ng(self, fac, t_9, mun_kt, y_z):
         y_zt = {}
@@ -45,7 +45,7 @@ class Ng:
             ylm[key] = float("-inf")
             y_zt[key] = 0
 
-        for key, value in self.net.get_nuclides().items():
+        for key, value in self.nuc.get_nuclides().items():
             if value["z"] in y_z:
                 y_t = fac[key] + value["a"] * mun_kt
                 if y_t > ylm[value["z"]]:
@@ -82,13 +82,13 @@ class Ng:
     def _compute_fac(self, t_9, rho):
         fac = {}
 
-        nuclides = self.net.get_nuclides()
+        nuclides = self.nuc.get_nuclides()
 
         delta_n = nuclides["n"]["mass excess"]
 
         for nuc in nuclides:
             fac[nuc] = np.log(
-                self.net.compute_quantum_abundance(nuc, t_9, rho)
+                self.nuc.compute_quantum_abundance(nuc, t_9, rho)
             ) + (
                 nuclides[nuc]["a"] * delta_n - nuclides[nuc]["mass excess"]
             ) * wn.consts.MeV_to_ergs / (
@@ -118,8 +118,8 @@ class Ng:
             as those given in *y_z*.
 
         Returns:
-            A `wnutils <https://wnutils.readthedocs.io>`_ zone object with
-            the results of the calculation.
+            A `wnutils <https://wnutils.readthedocs.io>`_ zone data dictionary
+            with the results of the calculation.
 
         """
 
@@ -164,8 +164,8 @@ class Ng:
             as those given in *y_z*.
 
         Returns:
-            A `wnutils <https://wnutils.readthedocs.io>`_ zone object with
-            the results of the calculation.
+            A `wnutils <https://wnutils.readthedocs.io>`_ zone data dictionary
+            with the results of the calculation.
 
         """
 
@@ -186,12 +186,12 @@ class Ng:
 
         Args:
             ``zone``: A `wnutils <https://wnutils.readthedocs.io>`_ zone
-            object with the physical conditions and abundances from which
-            to compute the equilibrium.
+            data dictionary with the physical conditions and abundances
+            from which to compute the equilibrium.
 
         Returns:
-            A `wnutils <https://wnutils.readthedocs.io>`_ zone object
-            with the results of the calculation.
+            A `wnutils <https://wnutils.readthedocs.io>`_ zone data
+            dictionary with the results of the calculation.
 
         """
 
