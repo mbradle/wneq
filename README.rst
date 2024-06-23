@@ -1,8 +1,8 @@
 Overview
 ========
 
-.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.12173989.svg
-  :target: https://zenodo.org/doi/10.5281/zenodo.12173989
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.12509474.svg
+  :target: https://zenodo.org/doi/10.5281/zenodo.12509474
 
 wneq is a python package for computing nuclear equilibria.
 
