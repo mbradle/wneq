@@ -9,8 +9,8 @@ Version 1.0.1
 
 Fix:
 
-  * Remove extra classifiers.
-  * Change to use latest doi.
+  * PyPI classifiers have been updated.
+  * The README now points to the latest DOI.
 
 Version 1.0.0
 -------------
