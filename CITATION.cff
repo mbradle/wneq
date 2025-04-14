@@ -8,7 +8,7 @@ authors:
   given-names: "Mengke"
   orcid: "https://orcid.org/0000-0002-6373-7494"
 title: "wneq"
-version: 1.0.1
+version: 1.1.0
 doi: 10.5281/zenodo.12509473
 date-released: 2024-06-25
 url: "https://github.com/mbradle/wneq"

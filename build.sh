@@ -4,6 +4,7 @@ rm -fr dist
 cd wneq
 black --line-length=79 *.py
 pylint *.py
+
 cd ../.github/workflows/
 pytest
 cd ../..
@@ -19,6 +20,7 @@ echo ""
 grep version wneq/__about__.py | grep -v ","
 grep version CITATION.cff | grep -v "cff-version"
 grep Version doc/source/changelog.rst | grep -v Versioning | head -1
+grep version pyproject.toml
 
 echo ""
 echo "Check the release date:"

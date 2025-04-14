@@ -1,40 +1,16 @@
 """This module computes (n,g)-(g,n) equilibrium from
 `webnucleo <https://webnucleo.readthedocs.io>`_ files."""
 
+from scipy import optimize
 import numpy as np
 import wnnet as wn
-from scipy import optimize
+import wneq.base as wqb
 
 
-class Ng:
-    """A class for handling (n,g)-(g,n) equilibria.
+class Ng(wqb.Base):
+    """A class for handling (n,g)-(g,n) equilibria."""
 
-    Args:
-        ``nuc``: A wnnet \
-        `nuclear data <https://wnnet.readthedocs.io/en/latest/wnnet.html#module-wnnet.nuc>`_\
-        object.
-
-
-    """
-
-    def __init__(self, nuc):
-        self.nuc = nuc
-
-    def get_nuclides(self, nuc_xpath=""):
-        """Method to return a collection of nuclides.
-
-        Args:
-            ``nuc_xpath`` (:obj:`str`, optional): An XPath expression to
-            select the nuclides.  Default is all species.
-
-        Returns:
-            A :obj:`dict` containing `wnutils <https://wnutils.readthedocs.io>`_ nuclides.
-
-        """
-
-        return self.nuc.get_nuclides(nuc_xpath=nuc_xpath)
-
-    def _compute_ng(self, fac, t_9, mun_kt, y_z):
+    def _compute_ng(self, t_9, mun_kt, y_z):
         y_zt = {}
         y_l = {}
         ylm = {}
@@ -47,7 +23,7 @@ class Ng:
 
         for key, value in self.nuc.get_nuclides().items():
             if value["z"] in y_z:
-                y_t = fac[key] + value["a"] * mun_kt
+                y_t = self.fac[key] + value["a"] * mun_kt
                 if y_t > ylm[value["z"]]:
                     ylm[value["z"]] = y_t
                 y_l[(key, value["z"], value["a"])] = y_t
@@ -69,7 +45,7 @@ class Ng:
             muz_kt = float(props[("muz_kt", str(key))])
             props[("muz_kt", str(key))] = str(muz_kt - ylm[key])
 
-        mass_frac[("n", 0, 1)] = np.exp(fac["n"] + mun_kt)
+        mass_frac[("n", 0, 1)] = np.exp(self.fac["n"] + mun_kt)
 
         props["mun_kt"] = str(mun_kt)
 
@@ -78,24 +54,6 @@ class Ng:
         )
 
         return {"properties": props, "mass fractions": mass_frac}
-
-    def _compute_fac(self, t_9, rho):
-        fac = {}
-
-        nuclides = self.nuc.get_nuclides()
-
-        delta_n = nuclides["n"]["mass excess"]
-
-        for nuc in nuclides:
-            fac[nuc] = np.log(
-                self.nuc.compute_quantum_abundance(nuc, t_9, rho)
-            ) + (
-                nuclides[nuc]["a"] * delta_n - nuclides[nuc]["mass excess"]
-            ) * wn.consts.MeV_to_ergs / (
-                wn.consts.k_B * t_9 * 1.0e9
-            )
-
-        return fac
 
     def compute(self, t_9, rho, mun, y_z):
         """Method to compute an (n,g)-(g,n) equilibrium.
@@ -123,17 +81,17 @@ class Ng:
 
         """
 
-        fac = self._compute_fac(t_9, rho)
+        self._update_fac(t_9, rho)
 
         mun_kt = mun * wn.consts.MeV_to_ergs / (wn.consts.k_B * t_9 * 1.0e9)
 
-        return self._compute_ng(fac, t_9, mun_kt, y_z)
+        return self._compute_ng(t_9, mun_kt, y_z)
 
-    def _root_func(self, x_var, fac, t_9, y_z):
+    def _root_func(self, x_var, t_9, y_z):
 
         result = 1
 
-        n_g = self._compute_ng(fac, t_9, x_var[0], y_z)
+        n_g = self._compute_ng(t_9, x_var[0], y_z)
 
         x_m = n_g["mass fractions"]
 
@@ -169,11 +127,11 @@ class Ng:
 
         """
 
-        fac = self._compute_fac(t_9, rho)
+        self._update_fac(t_9, rho)
 
-        sol = optimize.root(self._root_func, [-10], args=(fac, t_9, y_z))
+        sol = optimize.root(self._root_func, [-10], args=(t_9, y_z))
 
-        result = self._compute_ng(fac, t_9, sol.x[0], y_z)
+        result = self._compute_ng(t_9, sol.x[0], y_z)
 
         return result
 
@@ -198,7 +156,7 @@ class Ng:
         t_9 = float(zone["properties"]["t9"])
         rho = float(zone["properties"]["rho"])
 
-        fac = self._compute_fac(t_9, rho)
+        self._update_fac(t_9, rho)
 
         x_m = zone["mass fractions"]
 
@@ -211,8 +169,8 @@ class Ng:
                 else:
                     y_z[key[1]] = value / key[2]
 
-        sol = optimize.root(self._root_func, [-10], args=(fac, t_9, y_z))
+        sol = optimize.root(self._root_func, [-10], args=(t_9, y_z))
 
-        result = self._compute_ng(fac, t_9, sol.x[0], y_z)
+        result = self._compute_ng(t_9, sol.x[0], y_z)
 
         return result
