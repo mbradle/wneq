@@ -17,6 +17,9 @@ class Base:
         self.fac = {}
         self.mun_kt = 0
         self.ye = None
+        self.clusters = {}
+        self.mu_guess = {}
+        self.user_guess = {}
 
     def get_nuclides(self, nuc_xpath=""):
         """Method to return a collection of nuclides.
@@ -55,6 +58,38 @@ class Base:
                 x2 += factor * (x2 - x1)
                 f2 = f(x2, *args)
         return None
+
+    def update_initial_guesses(self, guesses):
+        """Method to update initial guesses for chemical potentials divided by kT.
+
+        Args:
+            ``guesses`` (:obj:`dict`, optional): A dictionary of the guesses.  The allowed keys\
+            of the dictionary are \"n\" (for the neutrons), \"p\" (for the protons), or an\
+            XPath expression for the cluster giving the initial guess for cluster defined by\
+            the expression.
+
+        Returns:
+            On successful return, the initial guesses for the species or clusters defined by the
+            input keys are updated to the corresponding values.  These guesses will then be
+            applied in the next calculation of the equilibrium.
+
+        """
+
+        self.user_guess.clear()
+        for key, value in mu_guesses.items():
+            self.user_guess[key] = value
+
+    def _set_initial_guesses(self):
+        x0 = -10
+        self.mu_guess.clear()
+        self.mu_guess["n"] = x0
+        self.mu_guess["p"] = x0
+        for cluster in self.clusters:
+            self.mu_guess[cluster] = x0
+
+        for key, value in self.user_guess.items():
+            if key in self.mu_guess:
+                self.mu_guess[key] = value
 
     def _set_base_properties(self, t_9, rho):
         result = {}
