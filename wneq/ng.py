@@ -1,7 +1,7 @@
 """This module computes (n,g)-(g,n) equilibrium from
 `webnucleo <https://webnucleo.readthedocs.io>`_ files."""
 
-from scipy import optimize
+import scipy.optimize as op
 import numpy as np
 import wnnet as wn
 import wneq.base as wqb
@@ -91,14 +91,16 @@ class Ng(wqb.Base):
 
         result = 1
 
-        n_g = self._compute_ng(t_9, x_var[0], y_z)
+        n_g = self._compute_ng(t_9, x_var, y_z)
 
         x_m = n_g["mass fractions"]
 
         for x_t in x_m.values():
             result -= x_t
 
-        return [result]
+        print(x_var, result)
+
+        return result
 
     def compute_with_root(self, t_9, rho, y_z):
         """Method to compute an (n,g)-(g,n) equilibrium.  The resulting
@@ -129,9 +131,12 @@ class Ng(wqb.Base):
 
         self._update_fac(t_9, rho)
 
-        sol = optimize.root(self._root_func, [-10], args=(t_9, y_z))
+        res_bracket = self._bracket_root(self._root_func, -10, args=(t_9, y_z))
+        res_root = op.root_scalar(
+            self._root_func, bracket=res_bracket, args=(t_9, y_z)
+        )
 
-        result = self._compute_ng(t_9, sol.x[0], y_z)
+        result = self._compute_ng(t_9, res_root.root, y_z)
 
         return result
 
@@ -169,8 +174,11 @@ class Ng(wqb.Base):
                 else:
                     y_z[key[1]] = value / key[2]
 
-        sol = optimize.root(self._root_func, [-10], args=(t_9, y_z))
+        res_bracket = self._bracket_root(self._root_func, -10, args=(t_9, y_z))
+        res_root = op.root_scalar(
+            self._root_func, bracket=res_bracket, args=(t_9, y_z)
+        )
 
-        result = self._compute_ng(t_9, sol.x[0], y_z)
+        result = self._compute_ng(t_9, res_root.root, y_z)
 
         return result

@@ -1,9 +1,19 @@
 """This module computes general constrained equilibria from
 `webnucleo <https://webnucleo.readthedocs.io>`_ files."""
 
-from scipy.optimize import elementwise
+from dataclasses import dataclass
+import scipy.optimize as op
 import numpy as np
+import wnnet.consts as wc
 import wneq.base as wqb
+
+
+@dataclass
+class _Cluster:
+    name: str
+    constraint: float
+    mu: float
+    nuclides: list
 
 
 class Equil(wqb.Base):
@@ -12,11 +22,8 @@ class Equil(wqb.Base):
     def __init__(self, nuc):
         wqb.Base.__init__(self, nuc)
 
-        self.ye = None
         self.fac = {}
         self.clusters = {}
-        self.cluster_nuclides = {}
-        self.cluster_mus = {}
         self.mup_kt = 0
 
     def compute(self, t_9, rho, ye=None, clusters=None):
@@ -53,40 +60,36 @@ class Equil(wqb.Base):
             self._set_clusters(clusters)
         else:
             self.clusters.clear()
-            self.cluster_nuclides.clear()
-            self.cluster_mus.clear()
 
-        res_bracket = elementwise.bracket_root(self._compute_a_root, -10)
-        res_root = elementwise.find_root(
-            self._compute_a_root, res_bracket.bracket
-        )
-        self.mun_kt = res_root.x
+        res_bracket = self._bracket_root(self._compute_a_root, -10)
+        res_root = op.root_scalar(self._compute_a_root, bracket=res_bracket)
+        self.mun_kt = res_root.root
+
+        props = self._set_base_properties(t_9, rho)
+
+        props["mun_kT"] = self.mun_kt
+        props["mup_kT"] = self.mup_kt
+        props["mun"] = wc.ergs_to_MeV * (self.mun_kt * (wc.k_B * t_9 * 1.0e9))
+        props["mup"] = wc.ergs_to_MeV * (self.mup_kt * (wc.k_B * t_9 * 1.0e9))
+
+        for value in self.clusters.values():
+            props[("cluster", value.name, "mu_kT")] = value.mu
+            props[("cluster", value.name, "constraint")] = value.constraint
 
         y = self._compute_abundances(self.mup_kt, self.mun_kt)
-        mass_fracs = self._convert_to_mass_fractions(y)
-        x_sum = 0
-        for key, value in mass_fracs.items():
-            if value > 1.0e-30:
-                x_sum += value
-                print(key, value)
-        print(x_sum)
-
-    def _convert_to_mass_fractions(self, _y):
-        result = {}
-        for key, value in self.nuc.get_nuclides().items():
-            if isinstance(_y[key], float):
-                result[key] = value["a"] * _y[key]
-            else:
-                result[key] = value["a"] * _y[key][0]
-        return result
+        return self._make_equilibrium_zone(props, y)
 
     def _set_clusters(self, clusters):
-        self.clusters = clusters
         for key, value in clusters.items():
-            self.cluster_nuclides[key] = self.nuc.get_nuclides(nuc_xpath=value)
+            self.clusters[key] = _Cluster(
+                name=key,
+                constraint=value,
+                mu=0,
+                nuclides=list(self.nuc.get_nuclides(nuc_xpath=key).keys()),
+            )
         cluster_nuclide_set = set()
-        for key in self.clusters:
-            for nuc in self.cluster_nuclides[key]:
+        for value in self.clusters.values():
+            for nuc in value.nuclides:
                 assert nuc not in cluster_nuclide_set
                 cluster_nuclide_set.add(nuc)
 
@@ -108,9 +111,9 @@ class Equil(wqb.Base):
                 + self.fac[key]
             )
 
-        for cluster in self.clusters:
-            for nuc in self.cluster_nuclides[cluster]:
-                exp_fac[nuc] += self.cluster_mus[cluster]
+        for value in self.clusters.values():
+            for nuc in value.nuclides:
+                exp_fac[nuc] += value.mu
 
         result = {}
         for nuc in self.nuc.get_nuclides():
@@ -121,13 +124,13 @@ class Equil(wqb.Base):
     def _compute_a_root(self, x):
 
         if self.ye:
-            res_bracket = elementwise.bracket_root(
+            res_bracket = self._bracket_root(
                 self._compute_z_root, -10, args=(x,)
             )
-            res_root = elementwise.find_root(
-                self._compute_z_root, res_bracket.bracket, args=(x,)
+            res_root = op.root_scalar(
+                self._compute_z_root, bracket=res_bracket, args=(x,)
             )
-            self.mup_kt = res_root.x
+            self.mup_kt = res_root.root
 
         y = self._compute_abundances(self.mup_kt, x)
 
@@ -135,16 +138,36 @@ class Equil(wqb.Base):
         for key, value in self.nuc.get_nuclides().items():
             result -= value["a"] * y[key]
 
-        print(x, result)
-
         return result
 
     def _compute_z_root(self, x, mun_kt):
+
+        for key, value in self.clusters.items():
+            res_bracket = self._bracket_root(
+                self._compute_cluster_root, -10, args=(x, mun_kt, key)
+            )
+            res_root = op.root_scalar(
+                self._compute_cluster_root,
+                bracket=res_bracket,
+                args=(x, mun_kt, key),
+            )
+            value.mu = res_root.root
 
         y = self._compute_abundances(x, mun_kt)
 
         result = self.ye
         for key, value in self.nuc.get_nuclides().items():
             result -= value["z"] * y[key]
+
+        return result
+
+    def _compute_cluster_root(self, x, mup_kt, mun_kt, cluster):
+
+        self.clusters[cluster].mu = x
+        y = self._compute_abundances(mup_kt, mun_kt)
+
+        result = self.clusters[cluster].constraint
+        for nuc in self.clusters[cluster].nuclides:
+            result -= y[nuc]
 
         return result

@@ -51,3 +51,15 @@ def test_zone():
 
     assert abs(yz[40] - x1 / 90.0) < 1.0e-15
     assert abs(yz[50] - x2 / 120.0) < 1.0e-15
+
+def test_qse():
+    nuc = wn.Nuc(io.BytesIO(requests.get("https://osf.io/kyhbs/download").content))
+
+    eq = wq.equil.Equil(nuc)
+    zone = eq.compute(5.0, 1.0e8, ye=0.5, clusters={"[z > 2]": 0.01})
+
+    xsum = 0
+    for value in zone['mass fractions'].values():
+        xsum += value
+
+    assert np.isclose(1., xsum, atol = 1.e-8)
