@@ -69,7 +69,7 @@ class Equil(wqb.Base):
                 value.mu = sol.x[value.index]
         else:
             res_bracket = self._bracket_root(
-                self._compute_a_root, self.mu_guess["n"]
+                self._compute_a_root, self.guess.mu["n"]
             )
             res_root = op.root_scalar(
                 self._compute_a_root, bracket=res_bracket
@@ -114,10 +114,10 @@ class Equil(wqb.Base):
 
         x0 = np.full(n_var, -10)
 
-        x0[0] = self.mu_guess["p"]
-        x0[1] = self.mu_guess["n"]
+        x0[0] = self.guess.mu["p"]
+        x0[1] = self.guess.mu["n"]
         for key, value in self.clusters.items():
-            x0[value.index] = self.mu_guess[key]
+            x0[value.index] = self.guess.mu[key]
 
         return x0
 
@@ -174,7 +174,7 @@ class Equil(wqb.Base):
 
         if self.ye:
             res_bracket = self._bracket_root(
-                self._compute_z_root, self.mu_guess["p"], args=(x,)
+                self._compute_z_root, self.guess.mu["p"], args=(x,)
             )
             res_root = op.root_scalar(
                 self._compute_z_root, bracket=res_bracket, args=(x,)
@@ -194,7 +194,7 @@ class Equil(wqb.Base):
         for key, value in self.clusters.items():
             res_bracket = self._bracket_root(
                 self._compute_cluster_root,
-                self.mu_guess[key],
+                self.guess.mu[key],
                 args=(x, mun_kt, key),
             )
             res_root = op.root_scalar(

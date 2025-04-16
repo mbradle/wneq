@@ -1,5 +1,12 @@
 """This module contains base elements for the equilibrium classes."""
 
+from dataclasses import dataclass
+
+@dataclass
+class _Guess:
+    x0: str
+    user: {}
+    mu: {}
 
 class Base:
     """A class for handling data for the equilibrium codes.
@@ -17,9 +24,8 @@ class Base:
         self.fac = {}
         self.mun_kt = 0
         self.ye = None
+        self.guess = _Guess(-10, {}, {})
         self.clusters = {}
-        self.mu_guess = {}
-        self.user_guess = {}
 
     def get_nuclides(self, nuc_xpath=""):
         """Method to return a collection of nuclides.
@@ -75,21 +81,20 @@ class Base:
 
         """
 
-        self.user_guess.clear()
-        for key, value in mu_guesses.items():
-            self.user_guess[key] = value
+        self.guess.user.clear()
+        for key, value in guesses.items():
+            self.guess.user[key] = value
 
     def _set_initial_guesses(self):
-        x0 = -10
-        self.mu_guess.clear()
-        self.mu_guess["n"] = x0
-        self.mu_guess["p"] = x0
+        self.guess.mu.clear()
+        self.guess.mu["n"] = self.guess.x0
+        self.guess.mu["p"] = self.guess.x0
         for cluster in self.clusters:
-            self.mu_guess[cluster] = x0
+            self.guess.mu[cluster] = self.guess.x0
 
-        for key, value in self.user_guess.items():
-            if key in self.mu_guess:
-                self.mu_guess[key] = value
+        for key, value in self.guess.user.items():
+            if key in self.guess.mu:
+                self.guess.mu[key] = value
 
     def _set_base_properties(self, t_9, rho):
         result = {}
