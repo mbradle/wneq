@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 @dataclass
 class _Guess:
-    x0: str
+    x0: float
     user: {}
     mu: {}
 
@@ -24,7 +24,7 @@ class Base:
         self.fac = {}
         self.mun_kt = 0
         self.ye = None
-        self.guess = _Guess(-10, {}, {})
+        self.guess = _Guess(-10., {}, {})
         self.clusters = {}
 
     def get_nuclides(self, nuc_xpath=""):

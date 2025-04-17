@@ -112,7 +112,7 @@ class Equil(wqb.Base):
         if self.clusters:
             n_var += len(self.clusters)
 
-        x0 = np.full(n_var, -10)
+        x0 = np.full(n_var, self.guess.x0)
 
         x0[0] = self.guess.mu["p"]
         x0[1] = self.guess.mu["n"]
