@@ -70,6 +70,7 @@ class Equil(wqb.Base):
             res_bracket = self._bracket_root(
                 self._compute_a_root, self.guess.mu["n"]
             )
+            assert res_bracket, "Root not bracketed."
             res_root = op.root_scalar(
                 self._compute_a_root, bracket=res_bracket
             )
@@ -190,6 +191,7 @@ class Equil(wqb.Base):
             res_bracket = self._bracket_root(
                 self._compute_z_root, self.guess.mu["p"], args=(x,)
             )
+            assert res_bracket, "Root not bracketed."
             res_root = op.root_scalar(
                 self._compute_z_root, bracket=res_bracket, args=(x,)
             )
@@ -216,6 +218,7 @@ class Equil(wqb.Base):
                 self.guess.mu[key],
                 args=(x, mun_kt, key),
             )
+            assert res_bracket, "Root not bracketed."
             res_root = op.root_scalar(
                 self._compute_cluster_root,
                 bracket=res_bracket,
