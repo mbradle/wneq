@@ -2,11 +2,13 @@
 
 from dataclasses import dataclass
 
+
 @dataclass
 class _Guess:
     x0: float
     user: {}
     mu: {}
+
 
 class Base:
     """A class for handling data for the equilibrium codes.
@@ -24,7 +26,7 @@ class Base:
         self.fac = {}
         self.mun_kt = 0
         self.ye = None
-        self.guess = _Guess(-10., {}, {})
+        self.guess = _Guess(-10.0, {}, {})
         self.clusters = {}
 
     def get_nuclides(self, nuc_xpath=""):
@@ -70,9 +72,10 @@ class Base:
 
         Args:
             ``guesses`` (:obj:`dict`, optional): A dictionary of the guesses.  The allowed keys\
-            of the dictionary are \"n\" (for the neutrons), \"p\" (for the protons), or an\
-            XPath expression for the cluster giving the initial guess for cluster defined by\
-            the expression.
+            of the dictionary are \"n\" (for the neutrons), \"p\" (for the protons), or\
+            XPath expressions defining the valid clusters for the equilibrium.\
+            The value for each key should be a float giving the initial guess for the\
+            chemical potential divided by kT for the species or cluster.
 
         Returns:
             On successful return, the initial guesses for the species or clusters defined by the
@@ -83,7 +86,7 @@ class Base:
 
         self.guess.user.clear()
         for key, value in guesses.items():
-            self.guess.user[key] = value
+            self.guess.user[key] = float(value)
 
     def _set_initial_guesses(self):
         self.guess.mu.clear()

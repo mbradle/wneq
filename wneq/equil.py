@@ -1,6 +1,7 @@
 """This module computes general constrained equilibria from
 `webnucleo <https://webnucleo.readthedocs.io>`_ files."""
 
+import sys
 from dataclasses import dataclass
 import scipy.optimize as op
 import numpy as np
@@ -62,19 +63,30 @@ class Equil(wqb.Base):
 
         sol = op.root(self._compute_multi_root, x0)
 
-        if sol.success:
-            self.mup_kt = sol.x[0]
-            self.mun_kt = sol.x[1]
-            for value in self.clusters.values():
-                value.mu = sol.x[value.index]
-        else:
+        if (
+            not sol.success
+            or np.linalg.norm(self._compute_multi_root(sol.x)) > 1.0e-4
+        ):
             res_bracket = self._bracket_root(
                 self._compute_a_root, self.guess.mu["n"]
             )
             res_root = op.root_scalar(
                 self._compute_a_root, bracket=res_bracket
             )
-            self.mun_kt = res_root.root
+
+            x0[0] = self.mup_kt
+            x0[1] = res_root.root
+            for value in self.clusters.values():
+                x0[value.index] = value.mu
+
+            sol = op.root(self._compute_multi_root, x0)
+
+            assert sol.success, "Root polishing failed."
+
+        self.mup_kt = sol.x[0]
+        self.mun_kt = sol.x[1]
+        for value in self.clusters.values():
+            value.mu = sol.x[value.index]
 
         props = self._set_base_properties(t_9, rho)
 
@@ -168,6 +180,8 @@ class Equil(wqb.Base):
             for nuc in value.nuclides:
                 result[value.index] -= y[nuc]
 
+        print(x, result)
+
         return result
 
     def _compute_a_root(self, x):
@@ -180,12 +194,17 @@ class Equil(wqb.Base):
                 self._compute_z_root, bracket=res_bracket, args=(x,)
             )
             self.mup_kt = res_root.root
+        else:
+            print("Feature not yet implemented.")
+            sys.exit()
 
         y = self._compute_abundances(self.mup_kt, x)
 
         result = 1.0
         for key, value in self.nuc.get_nuclides().items():
             result -= value["a"] * y[key]
+
+        print(x, result)
 
         return result
 
