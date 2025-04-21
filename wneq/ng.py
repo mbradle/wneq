@@ -131,7 +131,11 @@ class Ng(wqb.Base):
 
         self._update_fac(t_9, rho)
 
-        res_bracket = self._bracket_root(self._root_func, -10, args=(t_9, y_z))
+        self._set_initial_guesses()
+
+        res_bracket = self._bracket_root(
+            self._root_func, self.guess.mu["n"], args=(t_9, y_z)
+        )
         res_root = op.root_scalar(
             self._root_func, bracket=res_bracket, args=(t_9, y_z)
         )
@@ -174,7 +178,11 @@ class Ng(wqb.Base):
                 else:
                     y_z[key[1]] = value / key[2]
 
-        res_bracket = self._bracket_root(self._root_func, -10, args=(t_9, y_z))
+        self._set_initial_guesses()
+
+        res_bracket = self._bracket_root(
+            self._root_func, self.guess.mu["n"], args=(t_9, y_z)
+        )
         res_root = op.root_scalar(
             self._root_func, bracket=res_bracket, args=(t_9, y_z)
         )
