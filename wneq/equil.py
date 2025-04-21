@@ -181,8 +181,6 @@ class Equil(wqb.Base):
             for nuc in value.nuclides:
                 result[value.index] -= y[nuc]
 
-        print(x, result)
-
         return result
 
     def _compute_a_root(self, x):
@@ -205,8 +203,6 @@ class Equil(wqb.Base):
         result = 1.0
         for key, value in self.nuc.get_nuclides().items():
             result -= value["a"] * y[key]
-
-        print(x, result)
 
         return result
 
@@ -296,3 +292,100 @@ class Equil(wqb.Base):
                 eq_clusters[cluster] = y_c
 
         return self.compute(t_9, rho, ye=ye, clusters=eq_clusters)
+
+    def compute_low_temperature_nse(self, ye=None):
+        """Method to compute a nuclear statiscitcal equilibrium at low temperature in a\
+           two-species approximation.
+
+        Args:
+            ``ye`` (:obj:`float`, optional): The electron fraction at which to compute\
+            the equilibrium.  If not supplied, the routine computes the equilibrium\
+            without a fixed total neutron-to-proton ratio.
+
+        Returns:
+            A `wnutils <https://wnutils.readthedocs.io>`_ zone data dictionary\
+            with the results of the calculation.
+
+        """
+        if ye != None:
+            ye_t = ye
+            min_pair = self._find_min_pair(ye)
+        else:
+            res_min = op.minimize(
+                self._compute_pair_ye_min, [0.5])
+            )
+            ye_t = res_min.x[0]
+            min_pair = self._find_min_pair(ye_t)
+        props = {
+            "note": "computed in 2-species, low-temperature approximation",
+            "Ye": ye_t,
+        }
+        return self._make_equilibrium_zone(
+            props, self._compute_pair_abundances(min_pair, ye_t)
+        )
+
+    def _compute_pair_ye_min(self, ye):
+        if ye < 0 or ye > 1:
+            return 1.0e6
+        min_pair = self._find_min_pair(ye)
+        y = self._compute_pair_abundances(min_pair, ye)
+        return self._compute_mass_per_nucleon_for_pair(y)
+
+    def _find_min_pair(self, ye):
+        nuc_list = list(self.nuc.get_nuclides().keys())
+        dm_min = np.inf
+        min_pair = (nuc_list[0], nuc_list[0])
+        for i in range(len(nuc_list)):
+            for j in range(i + 1, len(nuc_list)):
+                y = self._compute_pair_abundances(
+                    (nuc_list[i], nuc_list[j]), ye
+                )
+                dm = self._compute_mass_per_nucleon_for_pair(y)
+                if dm < dm_min:
+                    dm_min = dm
+                    min_pair = (nuc_list[i], nuc_list[j])
+        return min_pair
+
+    def _compute_pair_abundances(self, pair, ye):
+        nucs = self.nuc.get_nuclides()
+        z_0 = nucs[pair[0]]["z"]
+        a_0 = nucs[pair[0]]["a"]
+        z_1 = nucs[pair[1]]["z"]
+        a_1 = nucs[pair[1]]["a"]
+
+        ye_0 = float(z_0) / float(a_0)
+        ye_1 = float(z_1) / float(a_1)
+
+        result = {}
+
+        if ye_0 != ye_1:
+            denom = ye_1 - ye_0
+            result[pair[0]] = (1.0 / a_0) * (ye_1 - ye) / denom
+            result[pair[1]] = (1.0 / a_1) * (ye - ye_0) / denom
+            return result
+        else:
+            if ye_0 == ye:
+                result[pair[0]] = 1.0 / a_0
+                result[pair[1]] = 0.0
+                return result
+            else:
+                return {pair[0]: -1.0, pair[1]: 1.0}
+
+    def _compute_mass_per_nucleon_for_pair(self, y):
+        for value in y.values():
+            if value < 0:
+                return np.inf
+
+        nucs = self.nuc.get_nuclides()
+
+        result = 0
+        for key, value in y.items():
+            result += value * (
+                nucs[key]["mass excess"]
+                + nucs[key]["a"]
+                * wc.consts.GSL_CONST_CGSM_UNIFIED_ATOMIC_MASS
+                * wc.ergs_to_MeV
+                * wc.c**2
+            )
+
+        return result
