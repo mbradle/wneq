@@ -52,14 +52,44 @@ def test_zone():
     assert abs(yz[40] - x1 / 90.0) < 1.0e-15
     assert abs(yz[50] - x2 / 120.0) < 1.0e-15
 
-def test_qse():
+def test_nse():
     nuc = wn.Nuc(io.BytesIO(requests.get("https://osf.io/kyhbs/download").content))
+    my_ye = 0.4
 
     eq = wq.equil.Equil(nuc)
-    zone = eq.compute(5.0, 1.0e8, ye=0.5, clusters={"[z > 2]": 0.01})
+    zone = eq.compute(5.0, 1.0e7, ye=my_ye)
 
     xsum = 0
-    for value in zone['mass fractions'].values():
+    ye = 0
+    for key, value in zone['mass fractions'].items():
         xsum += value
+        ye += key[1] * value / key[2]
 
     assert np.isclose(1., xsum, atol = 1.e-8)
+    assert np.isclose(my_ye, ye, atol = 1.e-8)
+
+def test_qse():
+    nuc = wn.Nuc(io.BytesIO(requests.get("https://osf.io/kyhbs/download").content))
+    my_ye = 0.5
+    my_yc = 0.01
+
+    eq = wq.equil.Equil(nuc)
+    zone = eq.compute(5.0, 1.0e8, ye=my_ye, clusters={"[z > 2]": my_yc})
+
+    xsum = 0
+    ye = 0
+    y = {}
+    for key, value in zone['mass fractions'].items():
+        xsum += value
+        y[key[0]] = value / key[2]
+        ye += key[1] * y[key[0]]
+
+    assert np.isclose(1., xsum, atol = 1.e-8)
+    assert np.isclose(my_ye, ye, atol = 1.e-8)
+
+    yc = 0
+    for species in nuc.get_nuclides(nuc_xpath = "[z > 2]"):
+        if species in y:
+            yc += y[species]
+
+    assert np.isclose(my_yc, yc, atol = 1.e-8)
