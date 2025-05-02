@@ -243,8 +243,7 @@ class Equil(wqb.Base):
 
     def compute_from_zone(self, zone, compute_ye=True, clusters=None):
         """Method to compute an equilibrium from input zone data.  The resulting
-        equilibrium is that the system would relax to in the absence of
-        charge-changing reactions and given sufficient time.
+        equilibrium is that the system would relax to given sufficient time.
 
         Args:
             ``zone``: A `wnutils <https://wnutils.readthedocs.io>`_ zone
@@ -294,7 +293,7 @@ class Equil(wqb.Base):
         return self.compute(t_9, rho, ye=ye, clusters=eq_clusters)
 
     def compute_low_temperature_nse(self, ye=None):
-        """Method to compute a nuclear statiscitcal equilibrium at low temperature in a\
+        """Method to compute a nuclear statistical equilibrium at low temperature in a\
            one- or two-species approximation.
 
         Args:
