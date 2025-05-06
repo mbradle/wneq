@@ -39,6 +39,12 @@ Documentation
 
 The project documentation is available at `<https://wneq.readthedocs.io>`_.
 
+Usage
+-----
+
+The best way to get started using wneq is to follow the
+`tutorial <https://github.com/mbradle/wneq/tree/main/tutorial>`_.
+
 .. |pypi| image:: https://badge.fury.io/py/wneq.svg 
     :target: https://badge.fury.io/py/wneq
 .. |license| image:: https://img.shields.io/github/license/mbradle/wneq
