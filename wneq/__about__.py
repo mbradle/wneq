@@ -12,6 +12,6 @@ __all__ = [
 
 __title__ = "wneq"
 __summary__ = "Python project to handle webnucleo equilibria"
-__version__ = "1.1.0"
+__version__ = "1.1.1"
 __author__ = "Clemson University"
 __copyright__ = "Clemson University, 2024-2025"
