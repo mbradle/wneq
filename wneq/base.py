@@ -44,10 +44,10 @@ class Base:
 
         return self.nuc.get_nuclides(nuc_xpath=nuc_xpath)
 
-    def _update_fac(self, t_9, rho):
+    def _update_fac(self, t9, rho):
 
         for nuc in self.nuc.get_nuclides():
-            self.fac[nuc] = self.nuc.compute_nse_factor(nuc, t_9, rho)
+            self.fac[nuc] = self.nuc.compute_nse_factor(nuc, t9, rho)
 
     def _bracket_root(self, f, x0, args=()):
         factor = 1.6
@@ -99,9 +99,9 @@ class Base:
             if key in self.guess.mu:
                 self.guess.mu[key] = value
 
-    def _set_base_properties(self, t_9, rho):
+    def _set_base_properties(self, t9, rho):
         result = {}
-        result["t9"] = t_9
+        result["t9"] = t9
         result["rho"] = rho
         if self.ye:
             result["ye"] = self.ye

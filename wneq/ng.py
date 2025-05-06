@@ -10,12 +10,12 @@ import wneq.base as wqb
 class Ng(wqb.Base):
     """A class for handling (n,g)-(g,n) equilibria."""
 
-    def _compute_ng(self, t_9, mun_kt, y_z):
+    def _compute_ng(self, t9, rho, mun_kt, y_z):
         y_zt = {}
         y_l = {}
         ylm = {}
         mass_frac = {}
-        props = {}
+        props = self._set_base_properties(t9, rho)
 
         for key in y_z.keys():
             ylm[key] = float("-inf")
@@ -50,16 +50,16 @@ class Ng(wqb.Base):
         props["mun_kt"] = str(mun_kt)
 
         props["mun"] = str(
-            wn.consts.ergs_to_MeV * (mun_kt * (wn.consts.k_B * t_9 * 1.0e9))
+            wn.consts.ergs_to_MeV * (mun_kt * (wn.consts.k_B * t9 * 1.0e9))
         )
 
         return {"properties": props, "mass fractions": mass_frac}
 
-    def compute(self, t_9, rho, mun, y_z):
+    def compute(self, t9, rho, mun, y_z):
         """Method to compute an (n,g)-(g,n) equilibrium.
 
         Args:
-            ``t_9`` (:obj:`float`): The temperature (in 10 :sup:`9` Kelvin)
+            ``t9`` (:obj:`float`): The temperature (in 10 :sup:`9` Kelvin)
             at which to compute the equilibrium.
 
             ``rho`` (:obj:`float`): The mass density in grams per cc  at which
@@ -81,28 +81,26 @@ class Ng(wqb.Base):
 
         """
 
-        self._update_fac(t_9, rho)
+        self._update_fac(t9, rho)
 
-        mun_kt = mun * wn.consts.MeV_to_ergs / (wn.consts.k_B * t_9 * 1.0e9)
+        mun_kt = mun * wn.consts.MeV_to_ergs / (wn.consts.k_B * t9 * 1.0e9)
 
-        return self._compute_ng(t_9, mun_kt, y_z)
+        return self._compute_ng(t9, rho, mun_kt, y_z)
 
-    def _root_func(self, x_var, t_9, y_z):
+    def _root_func(self, x_var, t9, rho, y_z):
 
         result = 1
 
-        n_g = self._compute_ng(t_9, x_var, y_z)
+        n_g = self._compute_ng(t9, rho, x_var, y_z)
 
         x_m = n_g["mass fractions"]
 
         for x_t in x_m.values():
             result -= x_t
 
-        print(x_var, result)
-
         return result
 
-    def compute_with_root(self, t_9, rho, y_z):
+    def compute_with_root(self, t9, rho, y_z):
         """Method to compute an (n,g)-(g,n) equilibrium.  The resulting
         equilibrium is that the system would relax to in the absence of
         charge-changing reactions and given sufficient time.  The return
@@ -110,7 +108,7 @@ class Ng(wqb.Base):
         appropriate equilibrium.
 
         Args:
-            ``t_9`` (:obj:`float`): The temperature (in 10 :sup:`9` Kelvin)
+            ``t9`` (:obj:`float`): The temperature (in 10 :sup:`9` Kelvin)
             at which to compute the equilibrium.
 
             ``rho`` (:obj:`float`): The mass density in grams per cc
@@ -129,18 +127,18 @@ class Ng(wqb.Base):
 
         """
 
-        self._update_fac(t_9, rho)
+        self._update_fac(t9, rho)
 
         self._set_initial_guesses()
 
         res_bracket = self._bracket_root(
-            self._root_func, self.guess.mu["n"], args=(t_9, y_z)
+            self._root_func, self.guess.mu["n"], args=(t9, rho, y_z)
         )
         res_root = op.root_scalar(
-            self._root_func, bracket=res_bracket, args=(t_9, y_z)
+            self._root_func, bracket=res_bracket, args=(t9, rho, y_z)
         )
 
-        result = self._compute_ng(t_9, res_root.root, y_z)
+        result = self._compute_ng(t9, rho, res_root.root, y_z)
 
         return result
 
@@ -162,10 +160,10 @@ class Ng(wqb.Base):
 
         """
 
-        t_9 = float(zone["properties"]["t9"])
+        t9 = float(zone["properties"]["t9"])
         rho = float(zone["properties"]["rho"])
 
-        self._update_fac(t_9, rho)
+        self._update_fac(t9, rho)
 
         x_m = zone["mass fractions"]
 
@@ -181,12 +179,12 @@ class Ng(wqb.Base):
         self._set_initial_guesses()
 
         res_bracket = self._bracket_root(
-            self._root_func, self.guess.mu["n"], args=(t_9, y_z)
+            self._root_func, self.guess.mu["n"], args=(t9, rho, y_z)
         )
         res_root = op.root_scalar(
-            self._root_func, bracket=res_bracket, args=(t_9, y_z)
+            self._root_func, bracket=res_bracket, args=(t9, rho, y_z)
         )
 
-        result = self._compute_ng(t_9, res_root.root, y_z)
+        result = self._compute_ng(t9, rho, res_root.root, y_z)
 
         return result

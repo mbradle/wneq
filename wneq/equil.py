@@ -26,11 +26,11 @@ class Equil(wqb.Base):
 
         self.mup_kt = 0
 
-    def compute(self, t_9, rho, ye=None, clusters=None):
+    def compute(self, t9, rho, ye=None, clusters=None):
         """Method to compute a nuclear equilibrium.
 
         Args:
-            ``t_9`` (:obj:`float`): The temperature (in 10 :sup:`9` Kelvin)
+            ``t9`` (:obj:`float`): The temperature (in 10 :sup:`9` Kelvin)
             at which to compute the equilibrium.
 
             ``rho`` (:obj:`float`): The mass density in grams per cc  at which
@@ -51,7 +51,7 @@ class Equil(wqb.Base):
         """
 
         self.ye = ye
-        self._update_fac(t_9, rho)
+        self._update_fac(t9, rho)
 
         self.clusters.clear()
         if clusters:
@@ -89,12 +89,12 @@ class Equil(wqb.Base):
         for value in self.clusters.values():
             value.mu = sol.x[value.index]
 
-        props = self._set_base_properties(t_9, rho)
+        props = self._set_base_properties(t9, rho)
 
         props["mun_kT"] = self.mun_kt
         props["mup_kT"] = self.mup_kt
-        props["mun"] = wc.ergs_to_MeV * (self.mun_kt * (wc.k_B * t_9 * 1.0e9))
-        props["mup"] = wc.ergs_to_MeV * (self.mup_kt * (wc.k_B * t_9 * 1.0e9))
+        props["mun"] = wc.ergs_to_MeV * (self.mun_kt * (wc.k_B * t9 * 1.0e9))
+        props["mup"] = wc.ergs_to_MeV * (self.mup_kt * (wc.k_B * t9 * 1.0e9))
 
         for value in self.clusters.values():
             props[("cluster", value.name, "mu_kT")] = value.mu
@@ -242,8 +242,9 @@ class Equil(wqb.Base):
         return result
 
     def compute_from_zone(self, zone, compute_ye=True, clusters=None):
-        """Method to compute an equilibrium from input zone data.  The resulting
-        equilibrium is that the system would relax to given sufficient time.
+        """Method to compute an equilibrium from input zone data.  The\
+        resulting equilibrium is that to which the system would relax given\
+        sufficient time.
 
         Args:
             ``zone``: A `wnutils <https://wnutils.readthedocs.io>`_ zone
@@ -262,7 +263,7 @@ class Equil(wqb.Base):
 
         """
 
-        t_9 = float(zone["properties"]["t9"])
+        t9 = float(zone["properties"]["t9"])
         rho = float(zone["properties"]["rho"])
 
         x_m = zone["mass fractions"]
@@ -290,17 +291,18 @@ class Equil(wqb.Base):
                         y_c += _y[nuc]
                 eq_clusters[cluster] = y_c
 
-        return self.compute(t_9, rho, ye=ye, clusters=eq_clusters)
+        return self.compute(t9, rho, ye=ye, clusters=eq_clusters)
 
     def compute_low_temperature_nse(self, ye=None):
-        """Method to compute a nuclear statistical equilibrium at low temperature in a\
-           one- or two-species approximation.
+        """Method to compute a nuclear statistical equilibrium at low\
+        temperature in a one- or two-species approximation.
 
         Args:
-            ``ye`` (:obj:`float`, optional): The electron fraction at which to compute\
-            the equilibrium.  If not supplied, the routine computes the equilibrium\
-            without a fixed total neutron-to-proton ratio, in which case, the equilibrium\
-            is computed in a one-species approximation.
+            ``ye`` (:obj:`float`, optional): The electron fraction at which\
+            to compute the equilibrium.  If not supplied, the routine computes\
+            the equilibrium without a fixed total neutron-to-proton ratio,\
+            in which case, the equilibrium is computed in a one-species\
+            approximation.
 
         Returns:
             A `wnutils <https://wnutils.readthedocs.io>`_ zone data dictionary\
