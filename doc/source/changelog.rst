@@ -10,6 +10,8 @@ Version 1.1.1
 Fix:
 
   * The project Zenodo DOI has been updated.
+  * The tutorial has been slightly edited for clarity and speed of execution.
+
 
 Version 1.1.0
 -------------
